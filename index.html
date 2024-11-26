@@ -2,12 +2,36 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    <title>The React Ecosystem</title>
   </head>
   <body>
     <div id="root"></div>
+    <!-- <a href="/desert">Go eat desert</a> -->
     <script type="module" src="/src/main.jsx"></script>
+    <!-- <script>
+      document.addEventListener('click', (event) => {
+          if (
+            // if you clicked on an A-nchor tag (link)
+            event.target.tagName === 'A' &&
+            // and you're going to a page on this domain (like /desert)
+            event.target.origin === location.origin
+          ) {
+            // don't ask the server for that resource!
+            event.preventDefault()
+            // instead, we'll go fetch the resource ourselves
+            const response = fetch('https://buffet.table/desert')
+            // ...convert that response to something we can work with
+            const htmlString = await response.text()
+            const desert = new DOMParser()
+              .parseFromString(htmlString, 'text/html')
+    
+            // ...and do something with that desert element
+            // ex. append desert to our "plate" in the DOM
+            document.querySelector('.my-plate').appendChild(desert)
+          }
+        })
+    </script> -->
   </body>
 </html>
