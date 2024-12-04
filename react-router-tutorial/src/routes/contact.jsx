@@ -1,16 +1,52 @@
-import { Form, useLoaderData } from "react-router-dom";
-import { getContact } from "../contacts";
+import { Form, useLoaderData, useFetcher } from "react-router-dom";
+import { getContact, updateContact } from "../contacts";
 
 /* 3. after action completes, RR reruns any loader function associated 
       with the current route 
       loaders fetch the latest data */
 // J. URL PARAMS IN LOADERS
+// CC.  NOT FOUND DATA
+/* whenever I have an expected error case in a loader or action (like
+data not existing) I can throw an error
+call stack will break
+React Router will catch it
+and the error path is rendered instead
+no attempt to render a null contact 
+*/
 export async function loader({ params }) {
   /* params are passed to the loader with keys that match the dynamic
     segment 
     these params are used to find a record by ID */
   const contact = await getContact(params.contactId);
+  /* this way, I avoid the component completely and render the error
+  path instead, telling the user something more specific
+  this way, my route elements don't need to concern themselves with
+  error and loading statess */
+  if (!contact) {
+    throw new Response("", {
+      status: 404,
+      statusText: "Not Found",
+    });
+  }
   return { contact };
+}
+
+/* request is the incoming HTTP request
+params contains route parameters defined in the route's path, 
+allows dynamic access to specific data based on the route's url */
+export async function action({ request, params }) {
+  /* returns a FormData object, provides an easy way to work with
+  form fields and their values */
+  const formData = await request.formData();
+  /* calls updateContact function to update the contact identified 
+  by params.contactId, passing in an object with updated data 
+  retrieves the value of the favorite field from the form data
+  converts the string value into a boolean 
+  if "true", the result is true, otherwise it's false 
+  pull the form data off the request, and send it to the data model */
+  return updateContact(params.contactId, {
+    favorite: formData.get("favorite") === "true",
+  });
 }
 
 // D. CONTACT ROUTE UI
@@ -101,9 +137,30 @@ export default function Contact() {
 }
 
 function Favorite({ contact }) {
-  const favorite = contact.favorite;
+  // AA. Mutations Without Navigation
+  /* useFetcher look lets me change data without causing a navigation 
+  star button on the contact page
+  I am not creating or deleting a new record, I don't want to change pages,
+  I only want to change the data on the page I'm looking at */
+  const fetcher = useFetcher();
+  // BB. OPTIMISTIC UI
+  /* fetcher knows the form data being submitted to the action
+  so it's available to me on fetcher.formData 
+  I can use it immediately to update the star's state even though the network hasn't finished 
+  if the update eventually fails, UI will revert to the real data 
+  
+  instead of always rendering the actual data, I check if the fetcher has any formData
+    being submitted, if so, I'll use that instead 
+    when the action is done, fetcher.formData will no longer exist, and I'm back to using
+    the actual data */
+  const favorite = fetcher.formData
+    ? fetcher.formData.get("favorite") === "true"
+    : contact.favorite;
   return (
-    <Form method="post">
+    /* this form will send formData with a favorite key that's either true or false
+    since its method is POSTm it will call the action
+    it will post to the route where the form is rendered */
+    <fetcher.Form method="post">
       <button
         name="favorite"
         value={favorite ? "false" : "true"}
@@ -111,7 +168,7 @@ function Favorite({ contact }) {
       >
         {favorite ? "★" : "☆"}
       </button>
-    </Form>
+    </fetcher.Form>
   );
 }
 

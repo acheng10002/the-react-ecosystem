@@ -1,0 +1,21 @@
+.container {
+  background-color: #f0f8ff;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.title {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.description {
+  font-size: 1rem;
+  color: #666;
+}
+
+.composesWithTitle {
+  composes: title;
+  background-color: beige;
+}

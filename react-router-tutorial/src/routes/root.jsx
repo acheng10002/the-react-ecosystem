@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   // F. CLIENT SIDE ROUTING
   Outlet,
@@ -10,6 +11,9 @@ import {
   Form,
   redirect,
   useNavigation,
+  /* I'd rather have the filtering happen on every key stroke 
+  instead of when the form is explicitly submitted */
+  useSubmit,
 } from "react-router-dom";
 import { getContacts, createContact } from "../contacts";
 
@@ -55,20 +59,48 @@ inside the Root component, useLoaderData is used to retrieve the data fetched
 by the loader */
 
 // G. LOADING DATA
-export async function loader() {
+/* V. GET SUBMISSIONS WITH CLIENT SIDE ROUTING
+filter the list if there are URLSearchParams 
+this is a GET, not a POST, so RR does not call the action 
+submitting a GET form is the same as clicking a link, only the url changes 
+so the code is in the loader and not the action of this route 
+it's a normal page navigation */
+export async function loader({ request }) {
+  // converts the request.url, a string, into a url object
+  const url = new URL(request.url);
+  // extracts the value of the q query parameter from the url's search string
+  const q = url.searchParams.get("q");
   /* 3. access and render the data 
-  React Router will automatically keep the data in sync with my UI */
-  const contacts = await getContacts();
-  return { contacts };
+  React Router will automatically keep the data in sync with my UI 
+  calls getContacts, passing the query parameter q as an argument */
+  const contacts = await getContacts(q);
+  /* the url and my form state are out of sync
+  so return q from my loader and set it as the search field default value */
+  return { contacts, q };
 }
 
 // B. THE ROOT ROUTE - which is the global layout for the app
 export default function Root() {
-  const { contacts } = useLoaderData();
+  const { contacts, q } = useLoaderData();
   /* useNavigation returns the current navigation state; it can be idle,
   submitting, or loading */
   // P. GLOBAL PENDING UI
   const navigation = useNavigation();
+  // X. SUBMITTING FORMS ONCHANGE
+  const submit = useSubmit();
+
+  // Y. ADDING A SEARCH SPINNER
+  /* in a production app, the search is likely looking for records in a 
+  database, that is too large to send all at once and filter client side
+  I need some immediate UI feedback for the search */
+  const searching =
+    navigation.location &&
+    new URLSearchParams(navigation.location.search).has("q");
+
+  /* React's useEffect manipulates the form's data in the DOM directly */
+  useEffect(() => {
+    document.getElementById("q").value = q;
+  }, [q]);
   return (
     <>
       <div id="sidebar">
@@ -91,8 +123,34 @@ export default function Root() {
               type="search"
               // is the url has ?q=, id name="search", url would have ?search=
               name="q"
+              className={searching ? "loading" : ""}
+              /* doing this, after I refresh after searching, the form field will
+              still show the query when the list is filtered */
+              // W. SYNCHRONIZING URLS TO FORM STATE
+              defaultValue={q}
+              // Z. MANAGING THE HISTORY STACK
+              /* replace the current entry in the history stack with the next page,
+              instead of pushing into it
+              use replace in submit */
+              onChange={(event) => {
+                const isFirstSearch = q == null;
+                /* currentTarget is the DOM node the event is attached to
+                currentTarget.form is the input's parent form node
+                submit will serialize and submit any form I pass to it 
+                
+                I only want to replace search results, not the page before I started
+                searching, so I do a quick check if this is the first search or not, 
+                and then decide to replace
+                each key stroke no longer creates new entries */
+                submit(event.currentTarget.form, {
+                  replace: !isFirstSearch,
+                });
+              }}
             />
-            <div id="search-spinner" aria-hidden hidden={true} />
+            {/* navigation.location shows up when the app is navigating to a
+            new url and loading the data for it, goes away when there is no
+            pending navigation anymore */}
+            <div id="search-spinner" aria-hidden hidden={!searching} />
             <div className="sr-only" aria-live="polite"></div>
           </Form>
           {/* change form to Form 

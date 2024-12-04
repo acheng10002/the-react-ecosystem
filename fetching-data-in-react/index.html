@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fetching Data in React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+<!-- keeping frontend data up-to-date with the server is a challenging task 
+ managing async state becomes increasingly complex with each added feature
+ each request has to have a minimum of 3 states to achieve an optimal user
+ experience: data, loading, and error 
+ 
+ web APIs are how the apps communicate with their backend over the internet 
+  using HTTP
+ two common styles for designing web APIs are REST and GraphQL 
+ When an app/client needs to access resources from the backend/server, it 
+  makes the request through the API and expects a response
+  each request and response cycle constitutes an API call
+  to initiate API calls either to retrieve information or perform other 
+  operations, I will use HTTP methods like GET, POST, PUT, and DELETE 
+  
+data fetching can be simple, handling the data upon returning to the client
+  can be complicated 
+I need to consider:
+1. where the data will live
+2. how I'll manage the loading state to improve the user experience
+3. how I'll manage the error state should anything go wrong
+I also need to consider optimizations like caching, request deduplication,
+  and preventing race conditions -->
