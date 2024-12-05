@@ -22,7 +22,6 @@ export default [
       react,
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
-      "css-modules": cssModules,
     },
     rules: {
       ...js.configs.recommended.rules,
@@ -34,10 +33,6 @@ export default [
         "warn",
         { allowConstantExport: true },
       ],
-      "css-modules/no-unused-class": "warn",
-      "css-modules/no-undef-class": "error",
-      // Vite uses JSX runtime automatically
-      "react/react-in-jsx-scope": "off",
     },
   },
 ];

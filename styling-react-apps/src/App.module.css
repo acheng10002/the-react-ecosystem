@@ -1,0 +1,50 @@
+/* App.module.css 
+the compiler generates unique class names before 
+sending the CSS to the browser 
+I can store a component's CSS styles in a single file,
+specific to that component */
+.container {
+  background-color: transparent;
+  padding: 20px;
+  border-radius: 100px;
+  text-align: center;
+}
+
+.title {
+  /* it's possible to compose class names from other 
+  CSS Modules 
+  
+  possible to compose from global class names */
+  composes: fancyText from "./style.css";
+  font-size: 40px;
+  color: green;
+  background: lightpink;
+}
+
+/* classes which have pseudo selectors attached will be
+brought along when used in a composes statement */
+.title:hover {
+  color: red;
+}
+
+/* Reuse styles from .title using composes */
+.description {
+  /* there can be multiple composes, but composes rules 
+  must be before other rules 
+  also possible to compose multiple classes
+  ex. composes: classNameA classNameB */
+  composes: title;
+  color: yellow;
+  /* Override or add styles */
+  font-style: italic;
+}
+
+/* CSS Modules support adding pseudo selectors */
+.text {
+  color: #777;
+  font-weight: 24px;
+}
+
+.text:hover {
+  color: #f60;
+}
